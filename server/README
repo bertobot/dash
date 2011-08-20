@@ -1,0 +1,4 @@
+To build this package, do:
+
+LIB=/usr/local/lib INCLUDE=/usr/local/include make
+
