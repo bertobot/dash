@@ -1,4 +1,4 @@
-#include "../Dash.h"
+#include "../core/Dash.h"
 #include "Worker.h"
 
 #include <MySocket/Select.h>
@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < opt_threads; i++) {
         Worker *newWorker = new Worker(server);
 
-        newWorker->setMetricHash(&mh);
+        newWorker->setDash(&dash);
         newWorker->setThreadWriter(&threadWriter);
         newWorker->setWorkerId(i);
 

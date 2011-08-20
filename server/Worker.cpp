@@ -13,33 +13,32 @@ Worker::Worker(ServerSocket *server) : thread() {
 }
 /////////////////////////////////////////////////
 void Worker::run() {
-	while (! shutdownflag) {
-		try {
-			client = new Socket(server->accept() );
+    while (! shutdownflag) {
+	try {
+	    client = new Socket(server->accept() );
 
-			if (challenge())
-				processRequest();
+	    if (challenge())
+		processRequest();
 
-			client->close();
-		}
+	    client->close();
+	}
 
-		catch(...) {
-			printLocal("busted...");
+	catch(...) {
+	    printLocal("busted...");
 
-			//shutdownflag = true;
-			//::exit(111);
-			//throw;            
-		}
+	    //shutdownflag = true;
+	    //::exit(111);
+	    //throw;
+	}
 
-        // clean up
-
-		delete client;
+	// clean up
+	delete client;
         client = NULL;
 
-		std::stringstream ss;
-		ss << "thread " << workerId << " finished.";
-		printLocal(ss.str() );
-	}
+	std::stringstream ss;
+	ss << "thread " << workerId << " finished.";
+	printLocal(ss.str() );
+    }
 
 	std::stringstream ss;
 	ss << "Worker " << workerId << " finished.";
@@ -51,11 +50,12 @@ void Worker::stop() {
 }
 /////////////////////////////////////////////////
 int Worker::close() {
-	int rc = -2;
-	if (client) {
-	    rc = client->close();
+    int rc = -2;
+    if (client) {
+	rc = client->close();
     }
-	return rc;
+    
+    return rc;
 }
 /////////////////////////////////////////////////
 void Worker::printLocal(const std::string & str) {
@@ -96,7 +96,37 @@ bool Worker::challenge() {
 /////////////////////////////////////////////////
 void Worker::processRequest()
 {
-    // NOTE: purposely empty
+    Select s;
+    s.setTimeout(180);
+
+    if (client) {
+	s.add(client->getSocketDescriptor() );
+
+	std::vector<int> fds = s.canRead();
+
+	if (fds.size() > 0) {
+	    std::string input = client->readLine();	    
+	    std::vector<std::string> tokens = split(' ', input);
+
+	    printLocal(input);
+
+	    /*
+	     * protocols supported:
+	     * 
+	     * put <key> <value>
+	     * get <key>
+	     * 
+	     * search <key|value> <regular expression>
+	     *
+	     */
+
+	    respond("ok - " + command);
+	}
+	else {
+	    respond("timeout.");
+	}
+    }
+
 }
 /////////////////////////////////////////////////
 void Worker::setThreadWriter(ThreadWriter* threadWriter)
