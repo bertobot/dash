@@ -1,17 +1,15 @@
 #ifndef __DashClient_h_
 #define __DashClient_h_
 
-#include <map>
-#include <string>
-
-typedef std::map<std::string, std::string> KVStore;
+#include <MySocket/ClientSocket.h>
 
 class DashClient {
 protected:
-    KVStore kvstore;
+    ClientSocket *client;
 
 public:
-    DashClient();
+    //DashClient();
+    DashClient(ClientSocket *client);
 
     void put(const std::string &key, const std::string &value);
     std::string get(const std::string &key);
