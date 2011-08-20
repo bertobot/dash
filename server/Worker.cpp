@@ -7,7 +7,7 @@ Worker::Worker(ServerSocket *server) : thread() {
     this->server = server;
     this->client = NULL;
     this->tw = NULL;
-    this->mh = NULL;    
+    this->dash = NULL;
     
     workerId = -1;
 }
@@ -112,8 +112,9 @@ int Worker::getWorkerId() const {
 	return workerId;
 }
 /////////////////////////////////////////////////
-void Worker::setMetricHash(MetricHash *mh) {
-    this->mh = mh;
+void Worker::setDash(Dash *d)
+{
+    this->dash = d;
 }
 /////////////////////////////////////////////////
 Worker::~Worker() {
@@ -126,6 +127,6 @@ Worker::~Worker() {
         delete server;
 
     tw = NULL;
-    mh = NULL;
+    dash = NULL;
 }
 /////////////////////////////////////////////////

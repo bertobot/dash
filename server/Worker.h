@@ -1,7 +1,7 @@
 #ifndef __Worker_h_
 #define __Worker_h_
 
-#include "MetricHash.h"
+#include "../core/Dash.h"
 #include "ThreadWriter.h"
 #include <MyThread/thread.h>
 #include <MySocket/ServerSocket.h>
@@ -14,14 +14,14 @@ class Worker : public thread {
 protected:
     bool shutdownflag;
     ThreadWriter *tw;
-    MetricHash *mh;
+    Dash *dash;
 
-	ServerSocket *server;
-	Socket *client;
-	int workerId;
+    ServerSocket *server;
+    Socket *client;
+    int workerId;
 
 public:
-	Worker(ServerSocket *server);
+    Worker(ServerSocket *server);
 
     void stop();
     int close();
@@ -29,7 +29,7 @@ public:
     void run();
 
     void setThreadWriter(ThreadWriter*);
-    void setMetricHash(MetricHash *);
+    void setDash(Dash *);
     virtual void processRequest();
     virtual bool challenge();
 
@@ -37,8 +37,8 @@ public:
     void respond(const std::string&);
     void printLocalAndRespond(const std::string&);
 
-	void setWorkerId(int id);
-	int getWorkerId() const;
+    void setWorkerId(int id);
+    int getWorkerId() const;
     
     virtual ~Worker();
 };

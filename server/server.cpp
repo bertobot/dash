@@ -1,4 +1,4 @@
-#include "MetricHash.h"
+#include "../Dash.h"
 #include "Worker.h"
 
 #include <MySocket/Select.h>
@@ -18,7 +18,7 @@ ServerSocket *server = NULL;
 /////////////////////////////////////////////////
 int main(int argc, char **argv) {
     int opt_port = 33000;
-	int opt_connections = 256;
+    int opt_connections = 256;
     std::string opt_name = "metro";
     std::string opt_logfile = "log.out";
     std::string opt_mode = "node";
@@ -30,7 +30,8 @@ int main(int argc, char **argv) {
 
     std::vector<Worker*> workerThreads;
     ThreadWriter threadWriter;
-    MetricHash mh;
+
+    Dash dash;
     
     // getopt
     // TODO: specify log file, port to run on, mode {proxy, node}, cap how much resources to use.

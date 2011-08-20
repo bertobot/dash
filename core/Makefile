@@ -1,6 +1,7 @@
 CC = g++ $(CCFLAGS) -ansi -Wall
 OBJ=\
-Dash.o
+Dash.o \
+DashClient.o
 
 lib: $(OBJ)
 	ar rs libDash.a $(OBJ)
