@@ -7,10 +7,21 @@ DashClient::DashClient(ClientSocket *client)
 /////////////////////////////////////////////////
 std::string DashClient::get(const std::string& key)
 {
+    Select s;
     std::stringstream ss("get " + key);
+    
     if (client) {
-	client->write(ss.str() );
-	return client->read();
+	s.add(client->getSocketDescriptor() );
+
+	std::vector<int> fds = s.canWrite();
+	
+	if (fds.size() > 0)
+	    client->write(ss.str() );
+	
+	fds = s.canRead();
+
+	if (fds.size() > 0)
+	    return client->readLine();
     }
 
     // TODO: exception!
@@ -18,10 +29,22 @@ std::string DashClient::get(const std::string& key)
 /////////////////////////////////////////////////
 void DashClient::put(const std::string& key, const std::string& value)
 {
+    Select s;
     std::stringstream ss(key + " " + value);
+    
     if (client) {
-	client->write(ss.str() );
-	client->read();
+	s.add(client->getSocketDescriptor() );
+
+	std::vector<int> fds = s.canWrite();
+	if (fds.size() > 0)
+	    client->write(ss.str() );
+
+	fds = s.canRead();
+	if (fds.size() > 0) {
+	    std::string response = client->readLine();
+
+	    // TODO: do something with response.
+	}
     }
 
     // TODO: exception;

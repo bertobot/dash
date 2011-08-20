@@ -4,7 +4,7 @@ TARGETS = test1
 all: $(TARGETS)
 
 test1: test1.o
-	$(CC) -o test1 test1.o -L.. -lDash
+	$(CC) -o test1 test1.o -L../core -lDash -lMyThread -lpthread
 
 .cpp.o:
 	$(CC) -c $<

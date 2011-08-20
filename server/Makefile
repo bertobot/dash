@@ -1,6 +1,5 @@
 CC=g++ -g3 -ansi -Wall 
 OBJ=\
-MetricHash.o \
 ThreadWriter.o \
 Worker.o
 
