@@ -9,7 +9,7 @@
 class Value {
 public:
     unsigned int count;
-    unsigned int timestamp;
+    unsigned int timestamp;    
     std::string value;
 
     Value() {

@@ -21,6 +21,8 @@ int main() {
 	return 1;
     }
 
+    printf("count: %ld, length: %ld, timestamp: %ld\n", v.count, v.value.length(), v.timestamp);
+
     v = dash.get("t2");
     if (v.value == msg2)
 	std::cout << "2... ok" << std::endl;
@@ -28,6 +30,8 @@ int main() {
 	std::cerr << "2... fail." << std::endl;
 	return 2;
     }
+
+    printf("count: %ld, length: %ld, timestamp: %ld\n", v.count, v.value.length(), v.timestamp);
 
     if (dash.get("t3").isEmpty() )
 	std::cout << "3... ok" << std::endl;
