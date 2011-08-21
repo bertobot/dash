@@ -120,7 +120,7 @@ void Worker::processRequest()
 	     *
 	     */
 
-	    respond("ok - " + command);
+	    respond("ok - " + input);
 	}
 	else {
 	    respond("timeout.");

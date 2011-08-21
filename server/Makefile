@@ -7,7 +7,7 @@ all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
 
 test: server.o all
-	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lSocket
+	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lSocket -lstrmanip++
 
 .cpp.o:
 	$(CC) -c $<
