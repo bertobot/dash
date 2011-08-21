@@ -5,22 +5,30 @@ Dash::Dash()
 
 }
 /////////////////////////////////////////////////
-std::string Dash::get(const std::string& key)
+Value Dash::get(const std::string& key)
 {
-    std::string result;
+    Value result;
 
     kvstoreMutex.lock();
     result = kvstore[key];
     kvstoreMutex.unlock();
-    
+
     return result;
 }
 /////////////////////////////////////////////////
 void Dash::put(const std::string& key, const std::string& value)
 {
     kvstoreMutex.lock();
-    
-    kvstore[key] = value;
+
+    Value v;
+
+    if (! kvstore[key].isEmpty() )
+	v = kvstore[key];
+
+    v.count++;
+    v.value = value;
+
+    kvstore[key] = v;
 
     kvstoreMutex.unlock();
 }
