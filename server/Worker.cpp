@@ -123,12 +123,13 @@ void Worker::processRequest()
 	    //respond("ok - " + input);
 
 	    if (tokens[0] == "put") {
-		if (tokens.size() != 3) {
+		if (tokens.size() < 3) {
 		    respond("nok");
 		    return;
 		}
 
 		dash->put(tokens[1], tokens[2]);
+
 		respond("ok");
 	    }
 
