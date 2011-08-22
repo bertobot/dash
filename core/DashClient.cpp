@@ -8,6 +8,7 @@ DashClient::DashClient(ClientSocket *client)
 std::string DashClient::get(const std::string& key)
 {
     Select s;
+    s.setTimeout(180);
     std::stringstream ss("get " + key);
     
     if (client) {
@@ -20,8 +21,19 @@ std::string DashClient::get(const std::string& key)
 	
 	fds = s.canRead();
 
-	if (fds.size() > 0)
-	    return client->readLine();
+	if (fds.size() > 0) {
+	    // the first response is the size of the payload.
+	    
+	    std::stringstream ss(client->readLine() );
+
+	    // TODO: may have to change MySocket::Socket to be unsigned int instead of int
+	    
+	    //unsigned int size = 0;
+	    int size = 0;
+	    ss >> size;
+
+	    return client->read(size);
+	}
     }
 
     // TODO: exception!
@@ -30,7 +42,8 @@ std::string DashClient::get(const std::string& key)
 void DashClient::put(const std::string& key, const std::string& value)
 {
     Select s;
-    std::stringstream ss(key + " " + value);
+    s.setTimeout(180);
+    std::stringstream ss("put " + key + " " + value);
     
     if (client) {
 	s.add(client->getSocketDescriptor() );
@@ -40,6 +53,7 @@ void DashClient::put(const std::string& key, const std::string& value)
 	    client->write(ss.str() );
 
 	fds = s.canRead();
+	
 	if (fds.size() > 0) {
 	    std::string response = client->readLine();
 
