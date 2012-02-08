@@ -8,12 +8,17 @@ Worker::Worker(ServerSocket *server) : thread() {
     this->client = NULL;
     this->tw = NULL;
     this->dash = NULL;
+    this->controlPort = NULL;
     
     workerId = -1;
 }
 /////////////////////////////////////////////////
 void Worker::run() {
     while (! shutdownflag) {
+        if (controlPort && controlPort->isDone()) {
+            break;
+        }
+        
 	try {
 	    client = new Socket(server->accept() );
 
@@ -40,9 +45,9 @@ void Worker::run() {
 	printLocal(ss.str() );
     }
 
-	std::stringstream ss;
-	ss << "Worker " << workerId << " finished.";
-	printLocal(ss.str() );
+    std::stringstream ss;
+    ss << "Worker " << workerId << " finished.";
+    printLocal(ss.str() );
 }
 /////////////////////////////////////////////////
 void Worker::stop() {
@@ -173,16 +178,19 @@ void Worker::setDash(Dash *d)
     this->dash = d;
 }
 /////////////////////////////////////////////////
+void Worker::setControlPort(ControlPort* cp)
+{
+    this->controlPort = cp;
+}
+/////////////////////////////////////////////////
 Worker::~Worker() {
     close();
 
     if (client)
         delete client;
 
-    if (server)
-        delete server;
-
     tw = NULL;
     dash = NULL;
+    controlPort = NULL;
 }
 /////////////////////////////////////////////////

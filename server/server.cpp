@@ -2,6 +2,7 @@
 #include "Worker.h"
 
 #include <MySocket/Select.h>
+#include <ControlPort/ControlPort.h>
 
 #include <vector>
 
@@ -18,6 +19,7 @@ ServerSocket *server = NULL;
 /////////////////////////////////////////////////
 int main(int argc, char **argv) {
     int opt_port = 33000;
+    int opt_controlport = opt_port + 1;
     int opt_connections = 256;
     std::string opt_name = "metro";
     std::string opt_logfile = "log.out";
@@ -125,6 +127,7 @@ int main(int argc, char **argv) {
 
             case 'p':
                 opt_port = atoi(optarg);
+                opt_controlport = opt_port + 1;
                 break;
 
             default:
@@ -158,6 +161,11 @@ int main(int argc, char **argv) {
     (void) signal(SIGINT,signal_cleanup);
     (void) signal(SIGPIPE,signal_pipe);
 
+    // start the control port
+    ControlPort cp(opt_controlport);
+    cp.setThreadCount(10);
+    cp.start();
+
 	server = new ServerSocket(opt_port);
 
 	if (! server->isValid() ) {
@@ -170,13 +178,12 @@ int main(int argc, char **argv) {
 		exit(5);
 	}
 
-	const int set = 1;
-	server->setOption(SOL_SOCKET, SO_REUSEADDR, set);
 	server->listen(opt_connections);
 
     for (int i = 0; i < opt_threads; i++) {
         Worker *newWorker = new Worker(server);
 
+        newWorker->setControlPort(&cp);
         newWorker->setDash(&dash);
         newWorker->setThreadWriter(&threadWriter);
         newWorker->setWorkerId(i);
@@ -189,39 +196,43 @@ int main(int argc, char **argv) {
 
     workerPtr = &workerThreads;
 
-    /*
-     * TODO: to be set here, not with each worker thread.
-     *
-    
-    // mode
-    if (opt_mode == "proxy") {
-        server.setProxy(true);
+    Select maintenance;
+    maintenance.setTimeout(3,0);
+
+    while (!cp.isDone()) {
+        maintenance.wait();
+
+        //TODO: do maintenance here.
     }
 
-	// connections
-	server.setMaxConnections(opt_connections);
+    // shut down the sockets by connecting to them.
+    for (int j = 0; j < opt_threads; j++) {
+        ClientSocket cs("127.0.0.1", opt_port);
+        cs.connect();
+        cs.writeLine("");
+        cs.close();
+    }
 
-    // server is in node mode by default
-    */
-    
-    // TODO: set name somewhere
-	
-	// finally, join all threads
-	for (int j = 0; j < opt_threads; j++) {
-		Worker *c = workerThreads[j];
-		if (c) {
-			c->join();
-			delete c;
-			c = NULL;
-		}
-	}
 
-	// clean up
-	server->close();
-	delete server;
-	server = NULL;
 
-	printf("goodbye.\n");
+    // finally, join all threads
+    for (int j = 0; j < opt_threads; j++) {
+        Worker *c = workerThreads[j];
+        if (c) {
+            c->join();
+            delete c;
+            c = NULL;
+        }
+    }
+
+    cp.join();
+
+    // clean up
+    server->close();
+    delete server;
+    server = NULL;
+
+    printf("goodbye.\n");
 }
 /////////////////////////////////////////////////
 void signal_cleanup(int sig) {

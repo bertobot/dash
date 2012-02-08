@@ -8,6 +8,7 @@
 #include <MySocket/Select.h>
 #include <MySocket/ServerSocket.h>
 #include <libstrmanip++/utils.h>
+#include <ControlPort/ControlPort.h>
 
 #include <iostream>
 #include <vector>
@@ -23,6 +24,7 @@ protected:
     ServerSocket *server;
     Socket *client;
     int workerId;
+    ControlPort *controlPort;
 
 public:
     Worker(ServerSocket *server);
@@ -34,6 +36,8 @@ public:
 
     void setThreadWriter(ThreadWriter*);
     void setDash(Dash *);
+    void setControlPort(ControlPort*);
+    
     virtual void processRequest();
     virtual bool challenge();
 

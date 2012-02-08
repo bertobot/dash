@@ -6,8 +6,8 @@ Worker.o
 all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
 
-test: server.o all
-	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lSocket -lstrmanip++
+server: server.o all
+	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lstrmanip++ -lControlPort -lSocket
 
 .cpp.o:
 	$(CC) -c $<
