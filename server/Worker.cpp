@@ -146,11 +146,9 @@ void Worker::processRequest()
 
 		Value v = dash->get(tokens[1]);
 		std::stringstream ss;
-		ss << v.value.length();
+		ss << v.value.length() << '\n' << v.value;
 		
 		respond(ss.str() );
-		respond(v.value);
-		respond("ok");
 	    }
 	}
 	else {

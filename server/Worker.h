@@ -32,7 +32,7 @@ public:
     void stop();
     int close();
 
-    void run();
+    virtual void run();
 
     void setThreadWriter(ThreadWriter*);
     void setDash(Dash *);

@@ -1,5 +1,6 @@
 #include "../core/Dash.h"
-#include "Worker.h"
+#include "ProxyWorker.h"
+#include "ProxyCommand.h"
 
 #include <MySocket/Select.h>
 #include <ControlPort/ControlPort.h>
@@ -16,6 +17,12 @@ void signal_pipe(int);
 
 std::vector<Worker*> *workerPtr = NULL;
 ServerSocket *server = NULL;
+
+enum OP_MODE {
+    OP_NODE,
+    OP_PROXY,
+};
+
 /////////////////////////////////////////////////
 int main(int argc, char **argv) {
     int opt_port = 33000;
@@ -27,6 +34,9 @@ int main(int argc, char **argv) {
     int opt_daemon = 0;
     int opt_flushtime = 10;
     int opt_threads = 10;
+
+    OP_MODE operationMode = OP_NODE;
+    std::map<std::string, ClientSocket> proxyConnections;
 
     int c;
 
@@ -118,7 +128,11 @@ int main(int argc, char **argv) {
 
             case 'm':
                 opt_mode = optarg;
-                printf("running in proxy mode\n");
+
+                if (opt_mode == "proxy") {
+                    printf("running in proxy mode\n");
+                    operationMode = OP_PROXY;
+                }
                 break;
 
             case 'n':
@@ -162,8 +176,19 @@ int main(int argc, char **argv) {
     (void) signal(SIGPIPE,signal_pipe);
 
     // start the control port
+    
+    CommandManager cm;
+    ProxyCommand proxyCommand;
     ControlPort cp(opt_controlport);
+
+    proxyCommand.associateMap(&proxyConnections);
+    
     cp.setThreadCount(10);
+    cp.associateCommandManager(&cm);
+
+    if (operationMode == OP_PROXY)
+        cm.add(&proxyCommand);
+    
     cp.start();
 
 	server = new ServerSocket(opt_port);
@@ -181,7 +206,15 @@ int main(int argc, char **argv) {
 	server->listen(opt_connections);
 
     for (int i = 0; i < opt_threads; i++) {
-        Worker *newWorker = new Worker(server);
+        Worker *newWorker;
+
+        if (operationMode == OP_NODE)
+            newWorker = new Worker(server);
+        else if (operationMode == OP_PROXY) {
+            newWorker = new ProxyWorker(server);
+            ProxyWorker *pw = (ProxyWorker*)newWorker;
+            pw->associateMap(&proxyConnections);
+        }
 
         newWorker->setControlPort(&cp);
         newWorker->setDash(&dash);

@@ -12,10 +12,9 @@ private:
 public:
     ProxySocket(const Socket &rhs);
 
-    virtual void run();
     virtual void stop();
 
-	bool addNode(const std::vector<std::string> &);
+    bool addNode(const std::vector<std::string> &);
     void dropNode(const std::vector<std::string> &);
     void listNodes(const std::vector<std::string> &);
 

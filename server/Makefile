@@ -1,7 +1,9 @@
 CC=g++ -g3 -ansi -Wall 
 OBJ=\
 ThreadWriter.o \
-Worker.o
+Worker.o \
+ProxyWorker.o \
+ProxyCommand.o 
 
 all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)

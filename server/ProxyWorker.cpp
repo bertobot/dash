@@ -1,112 +1,82 @@
-#include "Worker.h"
+#include "ProxyWorker.h"
 /////////////////////////////////////////////////
-Worker::Worker(ServerSocket *server) : thread() {
-	// TODO: this should throw an exception if server is null.
-
-	this->server = server;
-    shutdownflag = false;
-	
-	workerId = -1;
+ProxyWorker::ProxyWorker(ServerSocket *server) : Worker(server) {
+    map = NULL;
+    timeout = 3;
 }
 /////////////////////////////////////////////////
-void Worker::run() {
-	std::stringstream ss;
-
-	while (! shutdownflag) {
-		try {
-			client = new Socket(server->accept() );
-
-			if (challenge())
-				processRequest();
-
-			client->close();
-			delete client;
-			client = NULL;
-		}
-
-		catch(...) {
-			printLocal("busted...");
-			shutdownflag = true;
-			::exit(111);
-			throw;
-		}
-
-		ss.str("");
-		ss << "thread " << workerId << " finished.";
-		printLocal(ss.str() );
-	}
-
-	ss.str("");
-	ss << "Worker " << workerId << " finished.";
-	printLocal(ss.str() );
-}
-/////////////////////////////////////////////////
-void Worker::stop() {
-    shutdownflag = true;
-}
-/////////////////////////////////////////////////
-int Worker::close() {
-	int rc = -2;
-	if (client)
-	    rc = client->close();
-	return rc;
-}
-/////////////////////////////////////////////////
-void Worker::printLocal(const std::string & str) {
-    time_t seconds = time(NULL);
-    std::cerr << seconds << " [threadserver] " << str << std::endl;
-}
-/////////////////////////////////////////////////
-void Worker::printLocalAndRespond(const std::string & str) {
-    printLocal(str);
-    respond(str);
-}
-/////////////////////////////////////////////////
-void Worker::respond(const std::string &str) {
-    if (! client) {
-        // TODO: should this be an exception?
-        
-        printLocal("respond: client is null!\n");
+void ProxyWorker::processRequest()
+{
+    // TODO: log this as an error.
+    if (! map)
         return;
-    }
     
-    if (client->isValid() ) {
-        try {
-            client->write(str + "\r\n", MSG_NOSIGNAL);
-        }
-        catch (...) {
-            printLocal("fatal: couldn't write!\n");
-        }
+    std::string message;    
+    Select s1, s2;
+    
+    s1.setTimeout(timeout, 0);
+    s2.setTimeout(timeout, 0);
+    
+    s1.add(client->getSocketDescriptor());
+
+    if (! s1.canRead().empty() ) {
+        message = client->readLine();
     }
     else {
-        printLocal("warning: was not able to send '" + str + "' because socket wasn't ready for writing.");
+        // timeout
+        return;
+    }
+
+
+    std::map< std::string, ClientSocket >::iterator itr = map->begin();
+
+    for (; itr != map->end(); itr++) {
+        if (itr->second.connect() )
+            s2.add(itr->second.getSocketDescriptor() );
+    }
+
+    std::vector<int> ready = s2.canWrite();
+    
+    for (unsigned int i = 0; i < ready.size(); i++) {
+        Socket t(ready[i]);
+        t.writeLine(message);
+    }
+
+    ready = s2.canRead();
+    std::stringstream ss;
+    for (unsigned int i = 0; i < ready.size(); i++) {
+        Socket t(ready[i]);
+
+        message = t.readLine();
+
+        int size = atoi(message.c_str() );
+
+        ss << size;
+
+        if (size > 0)
+            ss << '\n' << t.readLine();
+
+        // respond to the client;
+        client->writeLine(ss.str());
+
+        // log and close
+
+        printf("%s:%d %s\n", t.getClientIP().c_str(), t.getClientPort(), ss.str().c_str() );
+        t.close();
+
+        ss.str("");
+
+        // only need to return one
+        break;
     }
 }
 /////////////////////////////////////////////////
-bool Worker::challenge() {
-    // NOTE: purposely empty
-    return true;
-}
-/////////////////////////////////////////////////
-void Worker::processRequest()
+void ProxyWorker::associateMap(std::map< std::string, ClientSocket >* m)
 {
-    // NOTE: purposely empty
+    map = m;
 }
 /////////////////////////////////////////////////
-void Worker::setThreadWriter(ThreadWriter* threadWriter)
-{
-    tw = threadWriter;
-}
-/////////////////////////////////////////////////
-void Worker::setWorkerId(int id) {
-	workerId = id;
-}
-/////////////////////////////////////////////////
-int Worker::getWorkerId() const {
-	return workerId;
-}
-/////////////////////////////////////////////////
-Worker::~Worker() {
-    close();
+ProxyWorker::~ProxyWorker() {
+    map = NULL;
 }
 /////////////////////////////////////////////////

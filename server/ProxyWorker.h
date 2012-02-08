@@ -1,21 +1,23 @@
-#ifndef __Worker_h_
-#define __Worker_h_
+#ifndef __ProxyWorker_h_
+#define __ProxyWorker_h_
 
 #include "Worker.h"
+#include <map>
+#include <MySocket/ClientSocket.h>
 
 class ProxyWorker : public Worker {
 protected:
-	std::vector<Socket*> *remotes;
+    std::map<std::string, ClientSocket> *map;
+    int timeout;
 
 public:
-	ProxyWorker(ServerSocket *server);
+    ProxyWorker(ServerSocket *server);
 
-    void run();
     void processRequest();
 
-    void associateRemotes(std::vector<Socket*> *remotes);
+    void associateMap(std::map<std::string, ClientSocket> *m);
 
-    virtual ~Worker();
+    virtual ~ProxyWorker();
 };
 
 #endif
