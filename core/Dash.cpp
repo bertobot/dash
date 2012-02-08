@@ -33,6 +33,17 @@ void Dash::put(const std::string& key, const std::string& value)
     kvstoreMutex.unlock();
 }
 /////////////////////////////////////////////////
+std::vector< std::string > Dash::getKeys()
+{
+    std::vector<std::string> result;
+
+    KVStore::iterator itr = kvstore.begin();
+    for (; itr != kvstore.end(); itr++)
+        result.push_back(itr->first);
+
+    return result;
+}
+/////////////////////////////////////////////////
 Dash::~Dash()
 {
 

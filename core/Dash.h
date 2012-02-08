@@ -3,6 +3,7 @@
 
 #include <MyThread/mutex.h>
 
+#include <vector>
 #include <map>
 #include <string>
 
@@ -38,6 +39,8 @@ public:
 
     void put(const std::string &key, const std::string &value);
     Value get(const std::string &key);
+
+    std::vector<std::string> getKeys();
 
     virtual ~Dash();
 };

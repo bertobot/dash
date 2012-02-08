@@ -1,6 +1,7 @@
 #include "../core/Dash.h"
 #include "ProxyWorker.h"
 #include "ProxyCommand.h"
+#include "KeysCommand.h"
 
 #include <MySocket/Select.h>
 #include <ControlPort/ControlPort.h>
@@ -179,10 +180,14 @@ int main(int argc, char **argv) {
     
     CommandManager cm;
     ProxyCommand proxyCommand;
+    KeysCommand keysCommand;
     ControlPort cp(opt_controlport);
 
     proxyCommand.associateMap(&proxyConnections);
-    
+    keysCommand.associateDash(&dash);
+
+    cm.add(&keysCommand);
+        
     cp.setThreadCount(10);
     cp.associateCommandManager(&cm);
 

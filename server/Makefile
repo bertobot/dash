@@ -3,7 +3,8 @@ OBJ=\
 ThreadWriter.o \
 Worker.o \
 ProxyWorker.o \
-ProxyCommand.o 
+ProxyCommand.o \
+KeysCommand.o
 
 all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
