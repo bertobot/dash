@@ -1,6 +1,6 @@
 #include "Dash.h"
 /////////////////////////////////////////////////
-Dash::Dash()
+Dash::Dash() : DashCleaner()
 {
 
 }
@@ -27,10 +27,25 @@ void Dash::put(const std::string& key, const std::string& value)
 
     v.count++;
     v.value = value;
+    v.setDirty(true);
 
     kvstore[key] = v;
 
     kvstoreMutex.unlock();
+}
+/////////////////////////////////////////////////
+KVStore Dash::getDirtyValues()
+{
+    KVStore result;
+
+    KVStore::iterator itr = kvstore.begin();
+    for (; itr != kvstore.end(); itr++) {
+        if (itr->second.isDirty() )
+            result.insert(std::pair<std::string, Value>(itr->first, itr->second) );
+    }
+
+    return result;
+
 }
 /////////////////////////////////////////////////
 std::vector< std::string > Dash::getKeys()
@@ -42,6 +57,13 @@ std::vector< std::string > Dash::getKeys()
         result.push_back(itr->first);
 
     return result;
+}
+/////////////////////////////////////////////////
+// TODO: implement / revisit this idea
+void Dash::clean(DashCleaner *&dc) {
+    if (dc) {
+        dc->clean(NULL);
+    }
 }
 /////////////////////////////////////////////////
 Dash::~Dash()
