@@ -133,7 +133,7 @@ void Worker::processRequest()
 		    return;
 		}
 
-		dash->put(tokens[1], tokens[2]);
+                dash->put(tokens[1], ::join(' ', tokens, 2) );
 
 		respond("ok");
 	    }
