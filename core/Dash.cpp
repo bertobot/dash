@@ -17,7 +17,7 @@ Value Dash::get(const std::string& key)
 
     ++kvstore[key].count;
 
-    if ( countLimit != -1 && kvstore[key].count > ageLimit )
+    if ( countLimit != -1 && kvstore[key].count > countLimit )
         kvstore.erase(key);
 
     if ( ageLimit != -1 && (time(NULL) - kvstore[key].timestamp) > ageLimit)
