@@ -2,6 +2,7 @@
 #include "ProxyWorker.h"
 #include "ProxyCommand.h"
 #include "KeysCommand.h"
+#include "StatsCommand.h"
 
 #include <MySocket/Select.h>
 #include <ControlPort/ControlPort.h>
@@ -181,12 +182,16 @@ int main(int argc, char **argv) {
     CommandManager cm;
     ProxyCommand proxyCommand;
     KeysCommand keysCommand;
+    StatsCommand statsCommand;
+    
     ControlPort cp(opt_controlport);
 
     proxyCommand.associateMap(&proxyConnections);
     keysCommand.associateDash(&dash);
+    statsCommand.associateDash(&dash);
 
     cm.add(&keysCommand);
+    cm.add(&statsCommand);
         
     cp.setThreadCount(10);
     cp.associateCommandManager(&cm);

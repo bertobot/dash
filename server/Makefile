@@ -4,7 +4,8 @@ ThreadWriter.o \
 Worker.o \
 ProxyWorker.o \
 ProxyCommand.o \
-KeysCommand.o
+KeysCommand.o \
+StatsCommand.o
 
 all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
