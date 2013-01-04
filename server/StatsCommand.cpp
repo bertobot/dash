@@ -23,7 +23,11 @@ std::string StatsCommand::execute(const std::vector< std::string >& list)
 
     for (unsigned int i = 0; i < keys.size(); i++) {
         Value v = dash->peek(keys[i]);
-        ss << keys[i] << " " << v.timestamp << " " << v.count << std::endl;
+        ss << keys[i] << " " << v.timestamp << " " << v.count << " ";
+
+        v.isEmpty() ? ss << 0 : ss << 1;
+
+        ss << std::endl;
     }
     
 
