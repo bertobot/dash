@@ -5,7 +5,8 @@ Worker.o \
 ProxyWorker.o \
 ProxyCommand.o \
 KeysCommand.o \
-StatsCommand.o
+StatsCommand.o \
+LimitCommand.o
 
 all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
