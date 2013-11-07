@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 use strict;
+
+use lib 'api/perl/lib';
+use lib 'lib/perl5';
+
 use Dash::Connection;
 use Getopt::Long;
 
@@ -41,7 +45,10 @@ if ($opt_get) {
         key     => $opt_key, 
     });
 
-    print $rc . "\n";
+
+    #syswrite(STDOUT, $rc, length($rc) );
+    printf "%s\n", $rc;
+    
 
 
 }

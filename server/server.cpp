@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
 
     // signal catcher first!
     (void) signal(SIGINT,signal_cleanup);
-    (void) signal(SIGPIPE,signal_pipe);
+    (void) signal(SIGPIPE, SIG_IGN);
 
     // start the control port
     
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
 		exit(5);
 	}
 
-	server->listen(opt_connections);
+    server->listen(opt_connections);
 
     for (int i = 0; i < opt_threads; i++) {
         Worker *newWorker;

@@ -127,33 +127,33 @@ void Worker::processRequest()
 
 	    //respond("ok - " + input);
 
-	    if (tokens[0] == "put") {
-		if (tokens.size() < 3) {
-		    respond("nok");
-		    return;
-		}
+        if (tokens[0] == "put") {
+            if (tokens.size() < 3) {
+                respond("nok");
+                return;
+            }
 
-                dash->put(tokens[1], ::join(' ', tokens, 2) );
+            dash->put(tokens[1], ::join(' ', tokens, 2) );
 
-		respond("ok");
-	    }
+            respond("ok");
+        }
 
-	    else if (tokens[0] == "get") {
-		if (tokens.size() != 2) {
-		    respond("nok");
-		    return;
-		}
+        else if (tokens[0] == "get") {
+            if (tokens.size() != 2) {
+                respond("nok");
+                return;
+            }
 
-		Value v = dash->get(tokens[1]);
-		std::stringstream ss;
-		ss << v.value.length() << '\n' << v.value;
-		
-		respond(ss.str() );
-	    }
-	}
-	else {
-	    respond("timeout.");
-	}
+            Value v = dash->get(tokens[1]);
+            std::stringstream ss;
+            ss << v.value.length() << '\n';
+
+            respond(ss.str() + v.value );
+            }
+        }
+        else {
+            respond("timeout.");
+        }
     }
 
 }

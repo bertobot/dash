@@ -53,7 +53,7 @@ sub put {
     my @readys = $select->can_write($self->timeout);
 
     if (! defined $readys[0]) {
-        $select->error('connection timed out before command.');
+        $self->error('connection timed out before command.');
         return 0;
     }
 
@@ -65,7 +65,7 @@ sub put {
     @readys = $select->can_read($self->timeout);
 
     if (! defined $readys[0]) {
-        $select->error('timeout expired after command. likely failed.');
+        $self->error('timeout expired after command. likely failed.');
         return -2;
     }
 
@@ -96,7 +96,7 @@ sub get {
     my @readys = $select->can_write($self->timeout);
 
     if (! defined $readys[0]) {
-        $select->error('connection timed out before command.');
+        $self->error('connection timed out before command.');
         return undef;
     }
 
@@ -108,7 +108,7 @@ sub get {
     @readys = $select->can_read($self->timeout);
 
     if (! defined $readys[0]) {
-        $select->error('timeout expired after command. likely failed.');
+        $self->error('timeout expired after command. likely failed.');
         return undef;
     }
 
