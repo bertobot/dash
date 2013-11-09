@@ -1,8 +1,6 @@
 CC=g++ -g3 -ansi -Wall 
 OBJ=\
-ThreadWriter.o \
-Worker.o \
-ProxyWorker.o \
+DashChannelHandler.o \
 ProxyCommand.o \
 KeysCommand.o \
 StatsCommand.o \
@@ -12,7 +10,7 @@ all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
 
 server: server.o all
-	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lstrmanip++ -lControlPort -lSocket
+	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lstrmanip++ -lControlPort -lnetty++ -lSocket
 
 .cpp.o:
 	$(CC) -c $<

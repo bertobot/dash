@@ -1,5 +1,5 @@
 #include "../core/Dash.h"
-#include "ProxyWorker.h"
+#include "DashChannelHandler.h"
 #include "ProxyCommand.h"
 #include "KeysCommand.h"
 #include "StatsCommand.h"
@@ -42,9 +42,6 @@ int main(int argc, char **argv) {
     std::map<std::string, ClientSocket> proxyConnections;
 
     int c;
-
-    std::vector<Worker*> workerThreads;
-    ThreadWriter threadWriter;
 
     Dash dash;
     
@@ -171,12 +168,19 @@ int main(int argc, char **argv) {
     }
 
     if (opt_logfile.length() ) {
-        threadWriter.load(opt_logfile);
+        //threadWriter.load(opt_logfile);
     }
 
     // signal catcher first!
     (void) signal(SIGINT,signal_cleanup);
     (void) signal(SIGPIPE, SIG_IGN);
+
+
+    // dash
+    
+    DashChannelHandler dch(&dash);
+    Server server(opt_port, opt_connections, &dch);
+    server.start();
 
     // start the control port
     
@@ -186,7 +190,7 @@ int main(int argc, char **argv) {
     StatsCommand statsCommand;
     LimitCommand limitCommand;
     
-    ControlPort cp(opt_controlport);
+    ControlPort cp(opt_controlport, 8, &cm);
 
     proxyCommand.associateMap(&proxyConnections);
     keysCommand.associateDash(&dash);
@@ -197,88 +201,13 @@ int main(int argc, char **argv) {
     cm.add(&keysCommand);
     cm.add(&statsCommand);
     cm.add(&limitCommand);
-        
-    cp.setThreadCount(10);
-    cp.associateCommandManager(&cm);
 
     if (operationMode == OP_PROXY)
         cm.add(&proxyCommand);
+
+    cp.run();
     
-    cp.start();
 
-	server = new ServerSocket(opt_port);
-
-	if (! server->isValid() ) {
-		printf("problem creating socket: %d\n", errno);
-		return 1;
-	}
-
-	if (! server->isBound() ) {
-		printf("binding error: %s\n", strerror(errno) );
-		exit(5);
-	}
-
-    server->listen(opt_connections);
-
-    for (int i = 0; i < opt_threads; i++) {
-        Worker *newWorker;
-
-        if (operationMode == OP_NODE)
-            newWorker = new Worker(server);
-        else if (operationMode == OP_PROXY) {
-            newWorker = new ProxyWorker(server);
-            ProxyWorker *pw = (ProxyWorker*)newWorker;
-            pw->associateMap(&proxyConnections);
-        }
-
-        newWorker->setControlPort(&cp);
-        newWorker->setDash(&dash);
-        newWorker->setThreadWriter(&threadWriter);
-        newWorker->setWorkerId(i);
-
-        newWorker->start();
-        printf("started thread %d.\n", i);
-        
-        workerThreads.push_back(newWorker);
-    }
-
-    workerPtr = &workerThreads;
-
-    Select maintenance;
-    maintenance.setTimeout(3,0);
-
-    while (!cp.isDone()) {
-        maintenance.wait();
-
-        //TODO: do maintenance here.
-    }
-
-    // shut down the sockets by connecting to them.
-    for (int j = 0; j < opt_threads; j++) {
-        ClientSocket cs("127.0.0.1", opt_port);
-        cs.connect();
-        cs.writeLine("");
-        cs.close();
-    }
-
-
-
-    // finally, join all threads
-    for (int j = 0; j < opt_threads; j++) {
-        Worker *c = workerThreads[j];
-        if (c) {
-            c->join();
-            delete c;
-            c = NULL;
-        }
-    }
-
-    cp.join();
-
-    // clean up
-    server->close();
-    delete server;
-    server = NULL;
 
     printf("goodbye.\n");
 }
@@ -292,3 +221,4 @@ void signal_pipe(int sig) {
     printf("sigpipe caught.  doing nothing!\n");
 }
 /////////////////////////////////////////////////
+// vim: ts=4:sw=4:expandtab
