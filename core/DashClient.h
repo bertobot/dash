@@ -2,7 +2,6 @@
 #define __DashClient_h_
 
 #include <MySocket/ClientSocket.h>
-#include <MySocket/Select.h>
 
 #include <sstream>
 

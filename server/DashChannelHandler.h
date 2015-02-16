@@ -3,6 +3,7 @@
 
 #include "../core/Dash.h"
 
+#include <MySocket/BufferedReader.h>
 #include <netty++/ChannelHandler.h>
 #include <libstrmanip++/utils.h>
 

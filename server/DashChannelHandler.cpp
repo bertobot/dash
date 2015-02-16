@@ -5,7 +5,8 @@ DashChannelHandler::DashChannelHandler(Dash *dash) : ChannelHandler() {
 }
 /////////////////////////////////////////////////
 void DashChannelHandler::onMessageReceived(Channel &channel) {
-	std::string input = channel.readLine();	    
+    BufferedReader bchannel(&channel);
+	std::string input = bchannel.readLine();	    
     std::vector<std::string> tokens = split(' ', input);
 
     /*
