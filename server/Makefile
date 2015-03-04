@@ -10,7 +10,7 @@ all: $(OBJ)
 	ar rs libmetroserver.a $(OBJ)
 
 server: server.o all
-	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lstrmanip++ -lControlPort -lnetty++ -lSocket
+	$(CC) -o server server.o $(OBJ) -L../core -lDash -lMyThread -lpthread -lstrmanip++ -lControlPort -lnetty++ -lSocket -lMyThread
 
 .cpp.o:
 	$(CC) -c $<
