@@ -7,17 +7,19 @@
 
 #include <stdlib.h>
 
+typedef std::map<std::string, ClientSocket> NamedChannelMap;
+
 class ProxyCommand : public Command {
-protected:
-    std::map<std::string, ClientSocket> *map;
-    
 public:
-    ProxyCommand();
+    ProxyCommand(NamedChannelMap *ncmap) : Command("proxy", "clusters dash instances.") { mMap = ncmap; }
+
+    virtual ~ProxyCommand() { mMap = NULL; }
 
     std::string execute(const std::vector< std::string >& list);
-    void associateMap(std::map<std::string, ClientSocket> *map);
 
-    virtual ~ProxyCommand();
+private:
+    NamedChannelMap *mMap;
 };
 
 #endif
+// vim: ts=4:sw=4:expandtab

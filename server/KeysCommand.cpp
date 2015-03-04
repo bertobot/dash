@@ -1,31 +1,17 @@
 #include "KeysCommand.h"
 
-KeysCommand::KeysCommand()
-{
-    name = "keys";
-    dash = NULL;
-}
-
-void KeysCommand::associateDash(Dash* d)
-{
-    dash = d;
-}
-
 std::string KeysCommand::execute(const std::vector< std::string >& list)
 {
     // TODO: log this error
-    if (! dash)
+    if (! mDash)
         return "error: dash is null.";
 
     std::string response;
 
-    for (unsigned int i = 0; i < dash->getKeys().size(); i++)
-        response += dash->getKeys()[i] + '\n';
+    for (unsigned int i = 0; i < mDash->getKeys().size(); i++)
+        response += mDash->getKeys()[i] + '\n';
 
     return response;
 }
 
-KeysCommand::~KeysCommand()
-{
-    dash = NULL;
-}
+// vim: ts=4:sw=4:expandtab
