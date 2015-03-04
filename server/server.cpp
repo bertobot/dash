@@ -5,8 +5,8 @@
 #include "StatsCommand.h"
 #include "LimitCommand.h"
 
-#include <MySocket/Select.h>
 #include <ControlPort/ControlPort.h>
+#include <netty++/Server.h>
 
 #include <vector>
 
@@ -17,9 +17,6 @@
 /////////////////////////////////////////////////
 void signal_cleanup(int);
 void signal_pipe(int);
-
-std::vector<Worker*> *workerPtr = NULL;
-ServerSocket *server = NULL;
 
 enum OP_MODE {
     OP_NODE,
@@ -39,7 +36,7 @@ int main(int argc, char **argv) {
     int opt_threads = 10;
 
     OP_MODE operationMode = OP_NODE;
-    std::map<std::string, ClientSocket> proxyConnections;
+    NamedChannelMap proxyConnections;
 
     int c;
 
@@ -185,18 +182,12 @@ int main(int argc, char **argv) {
     // start the control port
     
     CommandManager cm;
-    ProxyCommand proxyCommand;
-    KeysCommand keysCommand;    
-    StatsCommand statsCommand;
-    LimitCommand limitCommand;
+    ProxyCommand proxyCommand(&proxyConnections);
+    KeysCommand keysCommand(&dash);    
+    StatsCommand statsCommand(&dash);
+    LimitCommand limitCommand(&dash);
     
     ControlPort cp(opt_controlport, 8, &cm);
-
-    proxyCommand.associateMap(&proxyConnections);
-    keysCommand.associateDash(&dash);
-    statsCommand.associateDash(&dash);
-    limitCommand.associateDash(&dash);
-    
 
     cm.add(&keysCommand);
     cm.add(&statsCommand);
@@ -206,8 +197,6 @@ int main(int argc, char **argv) {
         cm.add(&proxyCommand);
 
     cp.run();
-    
-
 
     printf("goodbye.\n");
 }
