@@ -1,11 +1,7 @@
 #include "DashChannelHandler.h"
-/////////////////////////////////////////////////
-DashChannelHandler::DashChannelHandler(Dash *dash) : ChannelHandler() {
-    this->dash = dash;
-}
-/////////////////////////////////////////////////
-void DashChannelHandler::onMessageReceived(Channel &channel) {
-    BufferedReader bchannel(&channel);
+
+void DashChannelHandler::onMessageReceived(Channel &channel, std::string &payload) {
+    SplitIterator bchannel(payload);
 	std::string input = bchannel.readLine();	    
     std::vector<std::string> tokens = split(' ', input);
 
@@ -27,7 +23,7 @@ void DashChannelHandler::onMessageReceived(Channel &channel) {
             return;
         }
 
-        dash->put(tokens[1], ::join(' ', tokens, 2) );
+        mDash->put(tokens[1], ::join(' ', tokens, 2) );
 
         channel.writeLine("ok");
     }
@@ -38,16 +34,12 @@ void DashChannelHandler::onMessageReceived(Channel &channel) {
             return;
         }
 
-        Value v = dash->get(tokens[1]);
+        Value v = mDash->get(tokens[1]);
         std::stringstream ss;
         ss << v.value.length() << '\n';
 
         channel.writeLine(ss.str() + v.value );
     }
 }
-/////////////////////////////////////////////////
-DashChannelHandler::~DashChannelHandler() {
-    dash = NULL;
-}
-/////////////////////////////////////////////////
+
 // vim: ts=4:sw=4:expandtab

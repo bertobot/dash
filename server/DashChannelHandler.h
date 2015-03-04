@@ -14,14 +14,14 @@
 
 class DashChannelHandler : public ChannelHandler {
 public:
-    DashChannelHandler(Dash *dash);
+    DashChannelHandler(Dash *dash) { mDash = dash; }
 
-    virtual ~DashChannelHandler();
+    virtual ~DashChannelHandler() { mDash = NULL; }
 
-    void onMessageReceived(Channel &channel);
+    void onMessageReceived(Channel &channel, std::string &payload);
 
 private:
-    Dash *dash;
+    Dash *mDash;
 };
 
 #endif
